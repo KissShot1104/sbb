@@ -51,11 +51,11 @@ public class AnswerController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
     public String answerModify(AnswerForm answerForm, @PathVariable("id") Long id, Principal principal) {
-        Answer answer = this.answerService.getAnswer(id);
-        if (!answer.getAuthor().getUsername().equals(principal.getName())) {
+        AnswerForm existingAnswer = this.answerService.getAnswer(id);
+        if (!existingAnswer.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
-        answerForm.setContent(answer.getContent());
+        answerForm.setContent(existingAnswer.getContent());
         return "answer_form";
     }
     
@@ -66,30 +66,30 @@ public class AnswerController {
         if (bindingResult.hasErrors()) {
             return "answer_form";
         }
-        Answer answer = this.answerService.getAnswer(id);
-        if (!answer.getAuthor().getUsername().equals(principal.getName())) {
+        AnswerForm existingAnswer = this.answerService.getAnswer(id);
+        if (!existingAnswer.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
-        this.answerService.modify(answer, answerForm.getContent());
-        return String.format("redirect:/question/detail/%s#answer_%s", 
-                answer.getQuestion().getId(), answer.getId());
+        this.answerService.modify(id, answerForm);
+        return String.format("redirect:/question/detail/%s#answer_%s",
+                existingAnswer.getQuestion().getId(), existingAnswer.getId());
     }
     
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
     public String answerDelete(Principal principal, @PathVariable("id") Long id) {
-        Answer answer = this.answerService.getAnswer(id);
+        AnswerForm answer = this.answerService.getAnswer(id);
         if (!answer.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
         }
-        this.answerService.delete(answer);
+        this.answerService.delete(id);
         return String.format("redirect:/question/detail/%s", answer.getQuestion().getId());
     }
     
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/vote/{id}")
     public String answerVote(Principal principal, @PathVariable("id") Long id) {
-        Answer answer = this.answerService.getAnswer(id);
+        AnswerForm answer = this.answerService.getAnswer(id);
         SiteUserForm siteUser = this.userService.getUser(principal.getName());
         this.answerService.vote(answer, siteUser);
         return String.format("redirect:/question/detail/%s#answer_%s", 

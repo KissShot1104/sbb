@@ -51,4 +51,14 @@ public class UserService {
                 .build();
     }
 
+    public SiteUserForm siteUserToSiteUserForm(SiteUser siteUser) {
+        return SiteUserForm.builder()
+                .id(siteUser.getId())
+                .username(siteUser.getUsername())
+                .password(siteUser.getPassword())
+                .email(siteUser.getEmail())
+                .build();
+    }
+
+
 }

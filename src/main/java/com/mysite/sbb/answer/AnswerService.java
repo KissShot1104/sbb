@@ -12,6 +12,7 @@ import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -34,27 +35,69 @@ public class AnswerService {
         return answer;
     }
     
-    public Answer getAnswer(Long id) {
+    public AnswerForm getAnswer(Long id) {
         Optional<Answer> answer = this.answerRepository.findById(id);
-        if (answer.isPresent()) {
-            return answer.get();
-        } else {
+
+        if (answer.isEmpty()) {
             throw new DataNotFoundException("answer not found");
         }
+
+        SiteUserForm siteUser = userService.siteUserToSiteUserForm(answer.get().getAuthor());
+
+        return AnswerForm.builder()
+                .id(answer.get().getId())
+                .content(answer.get().getContent())
+                .question(answer.get().getQuestion())
+                .author(siteUser)
+                .voter(answer.get().getVoter())
+                .build();
     }
 
-    public void modify(Answer answer, String content) {
-        answer.setContent(content);
-        this.answerRepository.save(answer);
+    @Transactional
+    public void modify(Long answerId ,AnswerForm answerForm) {
+        Optional<Answer> answer = answerRepository.findById(answerId);
+
+        if (answer.isEmpty()) {
+            throw new DataNotFoundException("Not Found Answer");
+        }
+
+        answer.get().modifyAnswer(answerForm);
+    }
+
+    @Transactional
+    public void delete(Long answerId) {
+
+        Optional<Answer> answer = answerRepository.findById(answerId);
+
+        if (answer.isEmpty()) {
+            throw new DataNotFoundException("Not Found Answer");
+        }
+
+        this.answerRepository.delete(answer.get());
     }
     
-    public void delete(Answer answer) {
-        this.answerRepository.delete(answer);
-    }
-    
-    public void vote(Answer answer, SiteUserForm siteUserForm) {
+    public void vote(AnswerForm answerForm, SiteUserForm siteUserForm) {
         SiteUser siteUser = userService.siteUserFormToSiteUser(siteUserForm);
+
+        Answer answer = answerFormToAnswer(answerForm);
+
         answer.getVoter().add(siteUser);
         this.answerRepository.save(answer);
     }
+
+
+    public Answer answerFormToAnswer(AnswerForm answerForm) {
+        SiteUser author = userService.siteUserFormToSiteUser(answerForm.getAuthor());
+        return Answer.builder()
+                .id(answerForm.getId())
+                .content(answerForm.getContent())
+                .question(answerForm.getQuestion())
+                .author(author)
+                .voter(answerForm.getVoter())
+                .build();
+    }
+
+
+
+
 }
