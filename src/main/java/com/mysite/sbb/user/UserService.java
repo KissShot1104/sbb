@@ -1,8 +1,13 @@
 package com.mysite.sbb.user;
 
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.mysite.sbb.DataNotFoundException;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
@@ -11,7 +16,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    //BCryptPasswordEncoder는 @Bean으로 따로 만들어서 하자 그게 유지보수성면에서 더 좋다.
     public SiteUser create(String username, String email, String password) {
         SiteUser user = new SiteUser();
         user.setUsername(username);
@@ -20,5 +24,13 @@ public class UserService {
         this.userRepository.save(user);
         return user;
     }
-
+    
+    public SiteUser getUser(String username) {
+        Optional<SiteUser> siteUser = this.userRepository.findByusername(username);
+        if (siteUser.isPresent()) {
+            return siteUser.get();
+        } else {
+            throw new DataNotFoundException("siteuser not found");
+        }
+    }
 }

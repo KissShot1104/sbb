@@ -25,7 +25,7 @@ class SbbApplicationTests {
     @Transactional
     @Test
     void testJpa() {
-        Optional<Question> oq = this.questionRepository.findById(2L);
+        Optional<Question> oq = this.questionRepository.findById(2);
         assertTrue(oq.isPresent());
         Question q = oq.get();
 
