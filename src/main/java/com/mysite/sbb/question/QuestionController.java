@@ -2,6 +2,7 @@ package com.mysite.sbb.question;
 
 import java.security.Principal;
 
+import com.mysite.sbb.user.SiteUserForm;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,7 +59,7 @@ public class QuestionController {
             return "question_form";
         }
 
-        SiteUser siteUser = this.userService.getUser(principal.getName());
+        SiteUserForm siteUser = this.userService.getUser(principal.getName());
         this.questionService.create(questionForm, siteUser);
 
         return "redirect:/question/list";
@@ -115,7 +116,7 @@ public class QuestionController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/vote/{id}")
     public String questionVote(Principal principal, @PathVariable("id") Long id) {
-        SiteUser siteUser = this.userService.getUser(principal.getName());
+        SiteUserForm siteUser = this.userService.getUser(principal.getName());
         this.questionService.vote(id, siteUser);
         return String.format("redirect:/question/detail/%s", id);
     }

@@ -16,21 +16,39 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public SiteUser create(String username, String email, String password) {
-        SiteUser user = new SiteUser();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        this.userRepository.save(user);
-        return user;
+    public void create(UserCreateForm userCreateForm) {
+
+        SiteUser user = SiteUser.builder()
+                .username(userCreateForm.getUsername())
+                .email(userCreateForm.getEmail())
+                .password(passwordEncoder.encode(userCreateForm.getPassword1()))
+                .build();
+
+        userRepository.save(user);
     }
     
-    public SiteUser getUser(String username) {
+    public SiteUserForm getUser(String username) {
         Optional<SiteUser> siteUser = this.userRepository.findByusername(username);
-        if (siteUser.isPresent()) {
-            return siteUser.get();
-        } else {
+
+        if (siteUser.isEmpty()) {
             throw new DataNotFoundException("siteuser not found");
         }
+
+        return SiteUserForm.builder()
+                .id(siteUser.get().getId())
+                .password(siteUser.get().getPassword())
+                .username(siteUser.get().getUsername())
+                .email(siteUser.get().getEmail())
+                .build();
     }
+
+    public SiteUser siteUserFormToSiteUser(SiteUserForm siteUserForm) {
+        return SiteUser.builder()
+                .id(siteUserForm.getId())
+                .username(siteUserForm.getUsername())
+                .password(siteUserForm.getPassword())
+                .email(siteUserForm.getEmail())
+                .build();
+    }
+
 }

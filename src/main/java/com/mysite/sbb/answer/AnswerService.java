@@ -1,9 +1,10 @@
 package com.mysite.sbb.answer;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.mysite.sbb.question.QuestionRepository;
+import com.mysite.sbb.user.SiteUserForm;
+import com.mysite.sbb.user.UserService;
 import org.springframework.stereotype.Service;
 
 import com.mysite.sbb.DataNotFoundException;
@@ -18,17 +19,17 @@ public class AnswerService {
 
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
+    private final UserService userService;
 
 
-    public Answer create(Long questionId, String content, SiteUser author) {
+    public Answer create(Long questionId, String content, SiteUserForm author) {
 
         Optional<Question> question = questionRepository.findById(questionId);
-
 
         Answer answer = new Answer();
         answer.setContent(content);
         answer.setQuestion(question.get());
-        answer.setAuthor(author);
+        answer.setAuthor(userService.siteUserFormToSiteUser(author));
         this.answerRepository.save(answer);
         return answer;
     }
@@ -51,7 +52,8 @@ public class AnswerService {
         this.answerRepository.delete(answer);
     }
     
-    public void vote(Answer answer, SiteUser siteUser) {
+    public void vote(Answer answer, SiteUserForm siteUserForm) {
+        SiteUser siteUser = userService.siteUserFormToSiteUser(siteUserForm);
         answer.getVoter().add(siteUser);
         this.answerRepository.save(answer);
     }

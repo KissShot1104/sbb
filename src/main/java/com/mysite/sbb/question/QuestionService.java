@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.user.SiteUserForm;
+import com.mysite.sbb.user.UserService;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final UserService userService;
 
     public Page<Question> getList(int page, String kw) {
     	List<Sort.Order> sorts = new ArrayList<>();
@@ -53,11 +56,14 @@ public class QuestionService {
     }
 
     @Transactional
-    public void create(QuestionForm questionForm, SiteUser user) {
+    public void create(QuestionForm questionForm, SiteUserForm siteUserForm) {
+
+        SiteUser siteUser = userService.siteUserFormToSiteUser(siteUserForm);
+
         Question q = Question.builder()
                 .subject(questionForm.getSubject())
                 .content(questionForm.getContent())
-                .author(user)
+                .author(siteUser)
                 .build();
         this.questionRepository.save(q);
     }
@@ -87,13 +93,16 @@ public class QuestionService {
     }
 
     @Transactional
-    public void vote(Long questionId, SiteUser siteUser) {
+    public void vote(Long questionId, SiteUserForm siteUserForm) {
 
         Optional<Question> question = questionRepository.findById(questionId);
 
         if (question.isEmpty()) {
             throw new DataNotFoundException("question not found");
         }
+
+        SiteUser siteUser = userService.siteUserFormToSiteUser(siteUserForm);
+
         question.get().getVoter().add(siteUser);
 
         this.questionRepository.save(question.get());
