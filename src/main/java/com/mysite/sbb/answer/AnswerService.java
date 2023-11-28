@@ -3,6 +3,7 @@ package com.mysite.sbb.answer;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.mysite.sbb.question.QuestionRepository;
 import org.springframework.stereotype.Service;
 
 import com.mysite.sbb.DataNotFoundException;
@@ -16,19 +17,23 @@ import lombok.RequiredArgsConstructor;
 public class AnswerService {
 
     private final AnswerRepository answerRepository;
+    private final QuestionRepository questionRepository;
 
 
-    public Answer create(Question question, String content, SiteUser author) {
+    public Answer create(Long questionId, String content, SiteUser author) {
+
+        Optional<Question> question = questionRepository.findById(questionId);
+
+
         Answer answer = new Answer();
         answer.setContent(content);
-        answer.setCreateDate(LocalDateTime.now());
-        answer.setQuestion(question);
+        answer.setQuestion(question.get());
         answer.setAuthor(author);
         this.answerRepository.save(answer);
         return answer;
     }
     
-    public Answer getAnswer(Integer id) {
+    public Answer getAnswer(Long id) {
         Optional<Answer> answer = this.answerRepository.findById(id);
         if (answer.isPresent()) {
             return answer.get();
@@ -39,7 +44,6 @@ public class AnswerService {
 
     public void modify(Answer answer, String content) {
         answer.setContent(content);
-        answer.setModifyDate(LocalDateTime.now());
         this.answerRepository.save(answer);
     }
     

@@ -1,9 +1,12 @@
 package com.mysite.sbb.question;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.mysite.sbb.DateTime;
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.user.SiteUser;
 
@@ -16,16 +19,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
-@Setter
 @Entity
-public class Question {
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Question extends DateTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(length = 200)
     private String subject;
@@ -33,16 +37,19 @@ public class Question {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private LocalDateTime createDate;
-
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE)
-    private List<Answer> answerList;
+    private List<Answer> answerList = new ArrayList<>();
     
     @ManyToOne
     private SiteUser author;
     
-    private LocalDateTime modifyDate;
-    
     @ManyToMany
-    Set<SiteUser> voter;
+    Set<SiteUser> voter = new HashSet<>();
+
+
+    public void modifyQuestion(QuestionForm questionForm) {
+        this.subject = questionForm.getSubject();
+        this.content = questionForm.getContent();
+    }
+
 }

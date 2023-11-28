@@ -3,6 +3,7 @@ package com.mysite.sbb.answer;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.mysite.sbb.DateTime;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
 
@@ -19,23 +20,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class Answer {
+public class Answer extends DateTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(columnDefinition = "TEXT")
     private String content;
-
-    private LocalDateTime createDate;
 
     @ManyToOne
     private Question question;
     
     @ManyToOne
     private SiteUser author;
-    
-    private LocalDateTime modifyDate;
     
     @ManyToMany
     Set<SiteUser> voter;

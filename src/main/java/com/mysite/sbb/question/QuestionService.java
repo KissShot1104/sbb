@@ -18,6 +18,7 @@ import com.mysite.sbb.DataNotFoundException;
 import com.mysite.sbb.user.SiteUser;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -32,38 +33,70 @@ public class QuestionService {
         return this.questionRepository.findAllByKeyword(kw, pageable);
     }
     
-    public Question getQuestion(Integer id) {  
+    public QuestionForm getQuestion(Long id) {
         Optional<Question> question = this.questionRepository.findById(id);
-        if (question.isPresent()) {
-            return question.get();
-        } else {
+
+        if (question.isEmpty()) {
             throw new DataNotFoundException("question not found");
         }
+
+        return QuestionForm.builder()
+                .id(question.get().getId())
+                .subject(question.get().getSubject())
+                .content(question.get().getContent())
+                .author(question.get().getAuthor())
+                .answerList(question.get().getAnswerList())
+                .createDate(question.get().getCreateDate())
+                .modifyDate(question.get().getModifyDate())
+                .voter(question.get().getVoter())
+                .build();
     }
-    
-    public void create(String subject, String content, SiteUser user) {
-        Question q = new Question();
-        q.setSubject(subject);
-        q.setContent(content);
-        q.setCreateDate(LocalDateTime.now());
-        q.setAuthor(user);
+
+    @Transactional
+    public void create(QuestionForm questionForm, SiteUser user) {
+        Question q = Question.builder()
+                .subject(questionForm.getSubject())
+                .content(questionForm.getContent())
+                .author(user)
+                .build();
         this.questionRepository.save(q);
     }
-    
-    public void modify(Question question, String subject, String content) {
-        question.setSubject(subject);
-        question.setContent(content);
-        question.setModifyDate(LocalDateTime.now());
-        this.questionRepository.save(question);
+
+    @Transactional
+    public void modify(Long questionId, QuestionForm questionForm) {
+
+        Optional<Question> question = questionRepository.findById(questionId);
+
+        if (question.isEmpty()) {
+            throw new DataNotFoundException("question not found");
+        }
+
+        question.get().modifyQuestion(questionForm);
+
     }
     
-    public void delete(Question question) {
-        this.questionRepository.delete(question);
+    public void delete(Long questionId) {
+
+        Optional<Question> question = questionRepository.findById(questionId);
+
+        if (question.isEmpty()) {
+            throw new DataNotFoundException("question not found");
+        }
+
+        this.questionRepository.delete(question.get());
     }
-    
-    public void vote(Question question, SiteUser siteUser) {
-        question.getVoter().add(siteUser);
-        this.questionRepository.save(question);
+
+    @Transactional
+    public void vote(Long questionId, SiteUser siteUser) {
+
+        Optional<Question> question = questionRepository.findById(questionId);
+
+        if (question.isEmpty()) {
+            throw new DataNotFoundException("question not found");
+        }
+        question.get().getVoter().add(siteUser);
+
+        this.questionRepository.save(question.get());
     }
 
 }
