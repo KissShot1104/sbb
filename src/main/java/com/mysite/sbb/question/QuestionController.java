@@ -84,8 +84,10 @@ public class QuestionController {
     
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/modify/{id}")
-    public String questionModify(@Valid QuestionForm questionForm, BindingResult bindingResult, 
-            Principal principal, @PathVariable("id") Long id) {
+    public String questionModify(@Valid QuestionForm questionForm,
+                                 BindingResult bindingResult,
+                                 Principal principal,
+                                 @PathVariable("id") Long id) {
 
         if (bindingResult.hasErrors()) {
             return "question_form";
