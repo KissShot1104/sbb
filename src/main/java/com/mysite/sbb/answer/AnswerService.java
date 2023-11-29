@@ -1,9 +1,13 @@
 package com.mysite.sbb.answer;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.mysite.sbb.question.QuestionRepository;
 import com.mysite.sbb.user.SiteUserForm;
+import com.mysite.sbb.user.UserRepository;
 import com.mysite.sbb.user.UserService;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +25,7 @@ public class AnswerService {
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
 
     public Long create(Long questionId, AnswerForm answerForm, SiteUserForm author) {
@@ -47,12 +52,17 @@ public class AnswerService {
 
         SiteUserForm siteUser = userService.siteUserToSiteUserForm(answer.get().getAuthor());
 
+        Set<Long> voter = answer.get().getVoter().stream()
+                .map(SiteUser::getId)
+                .collect(Collectors.toSet());
+
+
         return AnswerForm.builder()
                 .id(answer.get().getId())
                 .content(answer.get().getContent())
                 .question(answer.get().getQuestion())
                 .author(siteUser)
-                .voter(answer.get().getVoter())
+                .voter(voter)
                 .build();
     }
 
@@ -91,12 +101,18 @@ public class AnswerService {
 
     public Answer answerFormToAnswer(AnswerForm answerForm) {
         SiteUser author = userService.siteUserFormToSiteUser(answerForm.getAuthor());
+
+        Set<SiteUser> voter = answerForm.getVoter().stream()
+                .map(userRepository::findById)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toSet());
+
         return Answer.builder()
                 .id(answerForm.getId())
                 .content(answerForm.getContent())
                 .question(answerForm.getQuestion())
                 .author(author)
-                .voter(answerForm.getVoter())
+                .voter(voter)
                 .build();
     }
 

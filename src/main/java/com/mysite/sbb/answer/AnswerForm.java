@@ -25,5 +25,5 @@ public class AnswerForm {
 
     private SiteUserForm author;//이름을 author? siteUserForm? siteUser?
 
-    Set<SiteUser> voter;
+    private Set<Long> voter;
 }
