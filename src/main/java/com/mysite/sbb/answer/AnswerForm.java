@@ -3,8 +3,6 @@ package com.mysite.sbb.answer;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.SiteUserForm;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotEmpty;
 
 import lombok.*;
