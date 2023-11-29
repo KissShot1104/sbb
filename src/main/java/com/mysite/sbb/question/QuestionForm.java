@@ -40,5 +40,5 @@ public class QuestionForm {
 
     private SiteUser author;
 
-    private Set<SiteUser> voter;
+    private Set<Long> voter;
 }

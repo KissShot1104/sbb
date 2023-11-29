@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.user.SiteUserForm;
@@ -43,6 +45,10 @@ public class QuestionService {
             throw new DataNotFoundException("question not found");
         }
 
+        Set<Long> voter = question.get().getVoter().stream()
+                .map(SiteUser::getId)
+                .collect(Collectors.toSet());
+
         return QuestionForm.builder()
                 .id(question.get().getId())
                 .subject(question.get().getSubject())
@@ -51,7 +57,7 @@ public class QuestionService {
                 .answerList(question.get().getAnswerList())
                 .createDate(question.get().getCreateDate())
                 .modifyDate(question.get().getModifyDate())
-                .voter(question.get().getVoter())
+                .voter(voter)
                 .build();
     }
 

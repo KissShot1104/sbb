@@ -115,5 +115,4 @@ public class AnswerService {
                 .voter(voter)
                 .build();
     }
-
 }
