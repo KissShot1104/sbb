@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,18 +35,23 @@ public class AnswerController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/create/{id}")
-    public String createAnswer(Model model, @PathVariable("id") Long id,
-            @Valid AnswerForm answerForm, BindingResult bindingResult, Principal principal) {
+    public String createAnswer(Model model,
+                               @PathVariable("id") Long id,
+                               @Validated AnswerForm answerForm,
+                               BindingResult bindingResult,
+                               Principal principal) {
+
         QuestionForm question = this.questionService.getQuestion(id);
         SiteUserForm siteUser = this.userService.getUser(principal.getName());
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("question", question);
             return "question_detail";
         }
-        Answer answer = this.answerService.create(id, answerForm.getContent(), siteUser);
+        Long answerId = this.answerService.create(id, answerForm, siteUser);
 
         return String.format("redirect:/question/detail/%s#answer_%s", 
-                answer.getQuestion().getId(), answer.getId());
+                id, answerId);
     }
     
     @PreAuthorize("isAuthenticated()")

@@ -23,16 +23,19 @@ public class AnswerService {
     private final UserService userService;
 
 
-    public Answer create(Long questionId, String content, SiteUserForm author) {
+    public Long create(Long questionId, AnswerForm answerForm, SiteUserForm author) {
 
         Optional<Question> question = questionRepository.findById(questionId);
 
-        Answer answer = new Answer();
-        answer.setContent(content);
-        answer.setQuestion(question.get());
-        answer.setAuthor(userService.siteUserFormToSiteUser(author));
+        Answer answer = Answer.builder()
+                .content(answerForm.getContent())
+                .question(question.get())
+                .author(userService.siteUserFormToSiteUser(author))
+                .build();
+
         this.answerRepository.save(answer);
-        return answer;
+
+        return answer.getId();
     }
     
     public AnswerForm getAnswer(Long id) {
@@ -96,8 +99,5 @@ public class AnswerService {
                 .voter(answerForm.getVoter())
                 .build();
     }
-
-
-
 
 }
