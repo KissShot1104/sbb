@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.answer.AnswerForm;
+import com.mysite.sbb.answer.AnswerService;
 import com.mysite.sbb.user.SiteUserForm;
 import com.mysite.sbb.user.UserService;
 import jakarta.persistence.criteria.*;
@@ -30,6 +32,7 @@ public class QuestionService {
 
     private final QuestionRepository questionRepository;
     private final UserService userService;
+    private final AnswerService answerService;
 
     public Page<Question> getList(int page, String kw) {
     	List<Sort.Order> sorts = new ArrayList<>();
@@ -37,7 +40,16 @@ public class QuestionService {
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
         return this.questionRepository.findAllByKeyword(kw, pageable);
     }
-    
+
+
+    public Page<Answer> getAnswerList(int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 5, Sort.by(sorts));
+        return this.questionRepository.findAnswerAll(pageable);
+    }
+
+
     public QuestionForm getQuestion(Long id) {
         Optional<Question> question = this.questionRepository.findById(id);
 
@@ -49,12 +61,19 @@ public class QuestionService {
                 .map(SiteUser::getId)
                 .collect(Collectors.toSet());
 
+        SiteUserForm authorForm = userService.siteUserToSiteUserForm(question.get().getAuthor());
+        List<AnswerForm> answerForms = question.get().getAnswerList().stream()
+                .map(answerService::answerToAnswerForm)
+                .toList();
+
+
+
         return QuestionForm.builder()
                 .id(question.get().getId())
                 .subject(question.get().getSubject())
                 .content(question.get().getContent())
-                .author(question.get().getAuthor())
-                .answerList(question.get().getAnswerList())
+                .author(authorForm)
+                .answerList(answerForms)
                 .createDate(question.get().getCreateDate())
                 .modifyDate(question.get().getModifyDate())
                 .voter(voter)

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -21,6 +22,8 @@ public class AnswerForm {
     private String content;
 
     private Question question;
+    private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
 
     private SiteUserForm author;//이름을 author? siteUserForm? siteUser?
 

@@ -10,6 +10,7 @@ import com.mysite.sbb.DateTime;
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.user.SiteUser;
 
+import com.mysite.sbb.user.SiteUserForm;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,7 +45,7 @@ public class Question extends DateTime {
     private SiteUser author;
     
     @ManyToMany
-    Set<SiteUser> voter = new HashSet<>();
+    private Set<SiteUser> voter = new HashSet<>();
 
 
     public void modifyQuestion(QuestionForm questionForm) {
