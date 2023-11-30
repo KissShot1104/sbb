@@ -1,8 +1,11 @@
 package com.mysite.sbb.question;
 
 
+import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.user.QSiteUser;
+import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -61,7 +64,7 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom{
         List<Question> questionList = queryFactory
                 .selectFrom(question)
                 .leftJoin(question.author, u1)
-                .leftJoin(answer).on(answer.question.eq(question))
+                .leftJoin(answer).on(answer.question.eq(question)).fetchJoin()
                 .leftJoin(answer.author, u2)
                 .where(
                         questionSubjectContains(kw)
@@ -70,50 +73,83 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom{
                                 .or(answerContentContains(kw))
                                 .or(answerAuthorContains(kw))
                 )
+                .distinct()
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        long total = questionList.size();
+        long total = queryFactory
+                .selectFrom(question)
+                .leftJoin(question.author, u1)
+                .leftJoin(answer).on(answer.question.eq(question)).fetchJoin()
+                .leftJoin(answer.author, u2)
+                .where(
+                        questionSubjectContains(kw)
+                                .or(questionContentContains(kw))
+                                .or(questionAuthorContains(kw))
+                                .or(answerContentContains(kw))
+                                .or(answerAuthorContains(kw))
+                )
+                .distinct()
+                .fetch().size();
 
 
+//        long total = questionList.size();//10개밖에 안뽑아오니까 그럼 최대한 끌어오고 나중에 다시 계산
 
         return new PageImpl<>(questionList, pageable, total);
     }
 
+    @Override
+    public Page<Answer> findAnswerAll(Pageable pageable) {
+
+        List<Answer> answerList = queryFactory
+                .selectFrom(answer)
+                .where(answer.question.eq(question))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = queryFactory
+                .select(answer)
+                .from(answer)
+                .where(answer.question.eq(question))
+                .stream().count();
+
+        return new PageImpl<>(answerList, pageable, total);
+    }
 
 
 
     public BooleanExpression questionSubjectContains(String questionSubjectCond) {
-        if (questionSubjectCond == null) {
-            return null;
+        if (questionSubjectCond == null || questionSubjectCond.isEmpty()) {
+            return Expressions.asBoolean(true).isTrue();
         }
         return question.subject.contains(questionSubjectCond);
     }
     public BooleanExpression questionContentContains(String questionContentCond) {
-        if (questionContentCond == null) {
-            return null;
+        if (questionContentCond == null || questionContentCond.isEmpty()) {
+            return Expressions.asBoolean(true).isTrue();
         }
         return question.content.contains(questionContentCond);
     }
 
     public BooleanExpression questionAuthorContains(String questionAuthorCond) {
-        if (questionAuthorCond == null) {
-            return null;
+        if (questionAuthorCond == null || questionAuthorCond.isEmpty()) {
+            return Expressions.asBoolean(true).isTrue();
         }
         return question.author.username.contains(questionAuthorCond);
     }
 
     public BooleanExpression answerContentContains(String answerContentCond) {
-        if (answerContentCond == null) {
-            return null;
+        if (answerContentCond == null || answerContentCond.isEmpty()) {
+            return Expressions.asBoolean(true).isTrue();
         }
         return answer.content.contains(answerContentCond);
     }
 
     public BooleanExpression answerAuthorContains(String answerAuthorCond) {
-        if (answerAuthorCond == null) {
-            return null;
+        if (answerAuthorCond == null || answerAuthorCond.isEmpty()) {
+            return Expressions.asBoolean(true).isTrue();
         }
         return answer.author.username.contains(answerAuthorCond);
     }

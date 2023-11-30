@@ -2,6 +2,7 @@ package com.mysite.sbb.question;
 
 import java.security.Principal;
 
+import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.user.SiteUserForm;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,9 +38,15 @@ public class QuestionController {
     }
     
     @GetMapping(value = "/detail/{id}")
-    public String detail(Model model, @PathVariable("id") Long id, AnswerForm answerForm) {
-    	QuestionForm question = this.questionService.getQuestion(id);
+    public String detail(Model model,
+                         @PathVariable("id") Long id,
+                         @ModelAttribute(value = "answerForm") AnswerForm answerForm,
+                         @RequestParam(value="page", defaultValue="0") int page) {
+
+    	QuestionForm question = questionService.getQuestion(id);
+        Page<Answer> pagingAnswer = questionService.getAnswerList(page);
         model.addAttribute("question", question);
+        model.addAttribute("paging", pagingAnswer);
         return "question_detail";
     }
     
