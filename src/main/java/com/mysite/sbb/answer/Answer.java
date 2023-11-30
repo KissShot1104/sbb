@@ -37,7 +37,7 @@ public class Answer extends DateTime {
     private SiteUser author;
     
     @ManyToMany
-    Set<SiteUser> voter;
+    private Set<SiteUser> voter;
 
     public void modifyAnswer(AnswerForm answerForm) {
         this.content = answerForm.getContent();

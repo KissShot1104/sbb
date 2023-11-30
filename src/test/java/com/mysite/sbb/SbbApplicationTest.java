@@ -21,7 +21,7 @@ class SbbApplicationTest {
     @Autowired
     private QuestionRepository questionRepository;
 
-    @Test
+    /*@Test
     public void init() {
         for (int i = 0; i < 156; i++) {
             questionRepository.save(Question.builder()
@@ -30,6 +30,6 @@ class SbbApplicationTest {
                     .createDate(LocalDateTime.now())
                     .build());
         }
-    }
+    }*/
 
 }

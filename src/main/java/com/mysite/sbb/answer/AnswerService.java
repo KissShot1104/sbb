@@ -115,4 +115,23 @@ public class AnswerService {
                 .voter(voter)
                 .build();
     }
+
+    public AnswerForm answerToAnswerForm(Answer answer) {
+
+        SiteUserForm author = userService.siteUserToSiteUserForm(answer.getAuthor());
+        Set<Long> voter = answer.getVoter().stream()
+                .map(SiteUser::getId)
+                .collect(Collectors.toSet());
+
+        return AnswerForm.builder()
+                .id(answer.getId())
+                .content(answer.getContent())
+                .question(answer.getQuestion())
+                .createDate(answer.getCreateDate())
+                .modifyDate(answer.getModifyDate())
+                .author(author)
+                .voter(voter)
+                .build();
+    }
+
 }
